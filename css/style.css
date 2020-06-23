@@ -1,0 +1,47 @@
+@font-face {
+  font-family: "Poppins";
+  src: url("../fonts/poppins/Poppins-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("../fonts/poppins/Poppins-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("../fonts/poppins/Poppins-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+body {
+  background-color: white;
+  overflow: hidden;
+  font-family: 'Poppins';
+  font-size: 22px;
+}
+
+.Easy {
+  fill: #49A05C;
+}
+
+.Moderate {
+  fill: #EA7E1F;
+}
+
+.Hard {
+  fill: #BF1829;
+}
+
+.played {
+  fill: #858585;
+}
+
+.hide {
+  display: none;
+}

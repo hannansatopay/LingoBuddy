@@ -1,0 +1,633 @@
+<html>
+
+<head>
+
+  <title>Game Designer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link href="css/jquery.flowchart.min.css" rel="stylesheet">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/cropper.css" rel="stylesheet">
+  <link href="fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href='css/designer.css' rel='stylesheet'>
+  <link href="css/sb-admin-2.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <script src="js/jquery-1.10.2.js"></script>
+  <script src="js/jquery.panzoom.min.js"></script>
+  <script src="js/jquery.flowchart.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/cropper.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-firestore.js"></script>
+  <style>
+    [contenteditable] {
+      outline: 0px solid transparent;
+      cursor: auto;
+    }
+
+    .disp {
+      color: green !important;
+      background-color: white !important;
+    }
+
+    body,
+    html {
+      margin: 0px;
+      padding: 0px;
+      overflow: hidden;
+      background-image: url(img/tile.png);
+      background-repeat: repeat;
+      background-size: 30px 30px;
+      background-color: #FBFBFB;
+      color: black !important;
+    }
+
+    .flowchart-operator {
+      border-radius: 5px;
+      box-shadow: 2px 2px 9px 0px rgba(0, 4, 18, 0.32)
+    }
+
+    .blocktext {
+      margin-left: 0px;
+    }
+
+    .blockdesc {
+      margin-bottom: 5px;
+    }
+
+    .blockelem {
+      margin-bottom: 10px;
+      width: 250px !important;
+      border: 1px solid red;
+      border-left: 6px solid red;
+    }
+
+    .flowchart-operator {
+      min-width: 300px;
+    }
+
+    [contentEditable=true]:empty:not(:focus):before {
+      content: attr(data-ph)
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .flowchart-operator:first-child {
+      background-color: #fbff0061;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="navigation">
+    <div id="leftside">
+      <div id="details" style="padding-top: 3px;">
+        <div id="names">
+          <p id="title"><span id="story-title" contenteditable='true' data-ph="Add story name"></span><span style="visibility:hidden;">|</span></p>
+          <p id="subtitle" contenteditable='true' data-ph="Add story description"></p>
+          <p style="padding-bottom: 3px;margin-bottom: 0px;font-family: Roboto;color: #808292;font-size: 14px;"><span id="category" contenteditable='true' data-ph="Add language"></span><span style="visibility:hidden;">|</span></p>
+        </div>
+      </div>
+    </div>
+    <div id="buttonsright">
+      <a href="dashboard.html" class="btn btn-info btn-icon-split" style="margin-left: 10px;margin-right: 10px;">
+        <span class="icon text-white-50" style="display: flex; align-items: center;">
+          <i class="fas fa-home"></i>
+        </span>
+        <span class="text">Dashboard</span>
+      </a>
+
+      <a href="#" class="btn btn-success btn-icon-split publish_data" style="margin-left: 10px;margin-right: 10px;">
+        <span class="icon text-white-50" style="display: flex; align-items: center;">
+          <i class="fas fa-check"></i>
+        </span>
+        <span class="text" id='storyStatus'>Publish Story</span>
+      </a>
+    </div>
+  </div>
+
+  <div id="leftcard">
+    <div class="draggable_operators">
+      <div class="draggable_operators_divs">
+        <div class="blockelem draggable_operator ui-draggable ui-draggable-handle" data-nb-inputs="1" data-nb-outputs="1">
+          <div class="blockin">
+            <div class="blocktext">
+              <p class="blocktitle">Tap Block</p>
+              <p class="blockdesc">A block to accept tap input</p>
+            </div>
+          </div>
+        </div>
+        <div class="blockelem draggable_operator ui-draggable ui-draggable-handle" data-nb-inputs="1" data-nb-outputs="2">
+          <div class="blockin">
+            <div class="blocktext">
+              <p class="blocktitle">Voice Block</p>
+              <p class="blockdesc">A block to accept voice input</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br> <br>
+    <div class="blocktext" style="width: 120%;margin-left: -25;">
+      <p class="blocktitle" style="background-color: #eee;padding: 20px!important;">Featured Image</p>
+      <br>
+      <img id="featuredimage" src="img/image_icon.png" style="width:100px;height:100px;border-radius:10px;margin-left: 30%;">
+      <input type='file' class='inputFile' id='featured' hidden='True' />
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel">Crop the image</h5>
+          <button type="button" class="close" id="crop" aria-label="Crop">
+            <span aria-hidden="true">&#x2714;</span>
+          </button>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-left: 10px;">
+            <span aria-hidden="true" style="color: red;">&#x2718;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="img-container">
+            <img id="image" src="">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="canvas" style="overflow: hidden; position: relative;">
+    <div class="flowchart-container flowchart-container" id="designer" style="width:10000px;height:10000px;"></div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+
+      var firebaseConfig = {
+        apiKey: "AIzaSyCgfwf_60vbSmfYO5hJzOTbv0wo50HJL_4",
+        authDomain: "lingobuddy-be6cf.firebaseapp.com",
+        databaseURL: "https://lingobuddy-be6cf.firebaseio.com",
+        projectId: "lingobuddy-be6cf",
+        storageBucket: "lingobuddy-be6cf.appspot.com",
+        messagingSenderId: "1012948925882",
+        appId: "1:1012948925882:web:1ff53524be563839717183"
+      };
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.firestore();
+      var storage = firebase.storage();
+
+
+      $(document).on("paste", "p[contenteditable='true']", function(e) {
+        e.preventDefault();
+        var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+        document.execCommand("insertHTML", false, text);
+      });
+
+
+      var selectedOperatorId;
+
+      var $flowchart = $('#designer');
+      var $container = $flowchart.parent();
+
+      var cx = $flowchart.width() / 2;
+      var cy = 0;
+
+      var storyID;
+
+      $flowchart.panzoom({
+        contain: 'invert'
+      });
+
+      $flowchart.panzoom('pan', -cx + $container.width() / 2, -cy + $container.height() / 2);
+
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('load')) {
+        Swal.fire({
+          title: 'Please wait!',
+          text: "Fetching the story.",
+          allowOutsideClick: false,
+          onBeforeOpen: () => {
+            Swal.showLoading()
+          },
+        });
+        var docRef = db.collection("Stories").doc(urlParams.get("load"));
+        docRef.get().then(function(doc) {
+          if (doc.exists) {
+            $.getJSON(doc.data()["data"], function(data) {
+              storyID = doc.id;
+              $flowchart.flowchart('setData', data);
+              try {
+                $flowchart.panzoom('pan', -1 * parseInt(data["operators"][Object.keys(data["operators"])[0]]["left"]) + 200, -1 * parseInt(data["operators"][Object.keys(data["operators"])[0]]["top"]) + 200);
+              } catch (err) {
+                console.log(err);
+              }
+
+              $("#story-title").text(data["title"]);
+              $("#category").text(data["category"]);
+              $("#subtitle").text(data["subtitle"]);
+              $("#featuredimage").attr("src", data["featuredimage"]);
+
+              Swal.fire({
+                title: "The story is loaded!",
+                icon: "success",
+                allowOutsideClick: false
+              });
+            });
+          } else {
+            Swal.fire({
+              title: "No such document!",
+              icon: "error",
+              allowOutsideClick: false
+            });
+          }
+        }).catch(function(error) {
+          Swal.fire({
+            title: error,
+            icon: "error",
+            allowOutsideClick: false
+          });
+        });
+      }
+
+      var possibleZooms = [0.4, 0.5, 0.75, 1];
+      var currentZoom = 1;
+      $container.on('mousewheel.focal', function(e) {
+        e.preventDefault();
+        var delta = (e.delta || e.originalEvent.wheelDelta) || e.originalEvent.detail;
+        var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+        currentZoom = Math.max(0, Math.min(possibleZooms.length - 1, (currentZoom + (zoomOut * 2 - 1))));
+        $flowchart.flowchart('setPositionRatio', possibleZooms[currentZoom]);
+        $flowchart.panzoom('zoom', possibleZooms[currentZoom], {
+          animate: false,
+          focal: e
+        });
+      });
+
+      $flowchart.flowchart({
+        verticalConnection: true,
+        multipleLinksOnInput: true
+      });
+
+      document.addEventListener('keyup', function(event) {
+        if (event.keyCode == 46 || (event.ctrlKey && event.keyCode == 46) || (event.ctrlKey && event.keyCode == 8)) {
+          $flowchart.flowchart('deleteSelected');
+        }
+      });
+
+      var $draggableOperators = $('.draggable_operator');
+
+      function getOperatorData($element) {
+        var nbInputs = parseInt($element.data('nb-inputs'));
+        var nbOutputs = parseInt($element.data('nb-outputs'));
+        if (nbOutputs == 1) {
+          var data = {
+            properties: {
+              body: "<div class='tap-block' contenteditable='true'>Add some text that you want to show.</div>",
+              inputs: {},
+              outputs: {}
+            }
+          };
+        } else {
+          var data = {
+            properties: {
+              body: "<div class='blockyinfo'><p class = 'qtext' contenteditable='true'>Question Text</p><table style='width:100%'><tr> <td align='center'><img class='left-img' src='img/image_icon.png' id='imgLogo' style='width:100px;height:100px;border-radius:10px;'/><input type='file' class='inputFile' id='inputFile' hidden='True'/></td> <td align='center'><img class='right-img' src='img/image_icon.png' id='imgLogo' style='width:100px;height:100px;border-radius:10px;'/><input type='file' id='inputFile' class='inputFile' hidden='True'/></td></tr> <tr> <td align='center' class='left-option' contenteditable='true'>Option A</td> <td align='center' class='right-option' contenteditable='true'>Option B</td></tr></table></div>",
+              inputs: {},
+              outputs: {}
+            }
+          };
+        }
+        var i = 0;
+        for (i = 0; i < nbInputs; i++) {
+          data.properties.inputs['input_' + i] = {
+            label: ''
+          };
+        }
+        for (i = 0; i < nbOutputs; i++) {
+          data.properties.outputs['output_' + i] = {
+            label: ''
+          };
+        }
+        return data;
+      }
+
+      var operatorId = 0;
+
+      $draggableOperators.draggable({
+        cursor: "move",
+        opacity: 0.7,
+        helper: 'clone',
+        appendTo: 'body',
+        zIndex: 1000,
+
+        stop: function(e, ui) {
+          var $this = $(this);
+          var elOffset = ui.offset;
+          var containerOffset = $container.offset();
+          if (elOffset.left > containerOffset.left &&
+            elOffset.top > containerOffset.top &&
+            elOffset.left < containerOffset.left + $container.width() &&
+            elOffset.top < containerOffset.top + $container.height()) {
+
+            var flowchartOffset = $flowchart.offset();
+
+            var relativeLeft = elOffset.left - flowchartOffset.left;
+            var relativeTop = elOffset.top - flowchartOffset.top;
+
+            var positionRatio = $flowchart.flowchart('getPositionRatio');
+            relativeLeft /= positionRatio;
+            relativeTop /= positionRatio;
+
+            var data = getOperatorData($this);
+            data.left = relativeLeft;
+            data.top = relativeTop;
+
+            $flowchart.flowchart('addOperator', data);
+          }
+        }
+      });
+
+      $(document).on("click", '.flowchart-operator', function() {
+        selectedOperatorId = $flowchart.flowchart('getSelectedOperatorId');
+      });
+
+      $(".flowchart-container").on("focusout", "[contenteditable]", function() {
+        if (selectedOperatorId != null) {
+          if ($(this).attr('class') == "tap-block") {
+            $flowchart.flowchart('setOperatorBody', selectedOperatorId, $(this).parent().html());
+          } else if ($(this).attr('class') == "qtext" || $(this).attr('class') == "qtextp") {
+            $flowchart.flowchart('setOperatorBody', selectedOperatorId, $(this).parent().parent().html());
+          } else {
+            $flowchart.flowchart('setOperatorBody', selectedOperatorId, $(this).parents(".blockyinfo").parent().html());
+          }
+        }
+      });
+
+      function save_story(type) {
+        var data = $flowchart.flowchart('getData');
+        try {
+          if ($("#story-title").text() === "") {
+            throw "You need to add the story title";
+          }
+          if ($("#category").text() === "") {
+            throw "You need to add the story category";
+          }
+          if ($("#subtitle").text() === "") {
+            throw "You need to add the story description";
+          }
+
+          data["title"] = $("#story-title").text();
+          data["category"] = $("#category").text();
+          data["subtitle"] = $("#subtitle").text();
+          data["featuredimage"] = $("#featuredimage").attr("src");
+
+
+          var scenes = {};
+          for (l in data["links"]) {
+            if (!(data["links"][l]["fromOperator"] in scenes)) {
+              scenes[data["links"][l]["fromOperator"]] = {
+                "choice": [(data["links"][l]["toOperator"]).toString()]
+              };
+            } else {
+              if (data["links"][l]["fromConnector"] == "output_1") {
+                scenes[data["links"][l]["fromOperator"]] = {
+                  "choice": [(scenes[(data["links"][l]["fromOperator"]).toString()]["choice"]).toString()].concat([(data["links"][l]["toOperator"]).toString()])
+                };
+              } else {
+                scenes[data["links"][l]["fromOperator"]] = {
+                  "choice": [(data["links"][l]["toOperator"]).toString()].concat([(scenes[(data["links"][l]["fromOperator"]).toString()]["choice"]).toString()])
+                };
+              }
+            }
+          }
+
+          var dict = {
+            "scenes": scenes
+          }
+
+          for (o in data["operators"]) {
+            if (Object.keys(data["operators"][o]["properties"]["outputs"]).length == 1) {
+              if (o in dict["scenes"]) {
+                dict["scenes"][o]["text"] = $(data["operators"][o]["properties"]["body"]).text();
+              } else {
+                dict["scenes"][o] = {
+                  "choice": "END",
+                  "text": $(data["operators"][o]["properties"]["body"]).text()
+                };
+              }
+            } else {
+              dict["scenes"][o]["textC"] = $(data["operators"][o]["properties"]["body"]).find(".qtext").text();
+              dict["scenes"][o]["left-img"] = $(data["operators"][o]["properties"]["body"]).find(".left-img").attr('src');
+              dict["scenes"][o]["right-img"] = $(data["operators"][o]["properties"]["body"]).find(".right-img").attr('src');
+              dict["scenes"][o]["right-option"] = $(data["operators"][o]["properties"]["body"]).find(".right-option").text();
+              dict["scenes"][o]["left-option"] = $(data["operators"][o]["properties"]["body"]).find(".left-option").text();
+            }
+          }
+
+          data["story"] = dict;
+
+          var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+
+          var d = new Date();
+          var utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+          let options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+          };
+          var ist = new Date(utc + (3600000 * +5.5)).toLocaleString('en-US', options);
+
+          if (storyID) {
+            db.collection("Stories").doc(storyID).set({
+              name: $("#story-title").text(),
+              category: $("#category").text(),
+              description: $("#subtitle").text(),
+              featuredimage: $("#featuredimage").attr("src"),
+              status: type,
+              timestamp_modified: ist
+            }, {
+              merge: true
+            }).then(function() {
+              var storageRef = firebase.storage().ref(storyID + '.json');
+              storageRef.putString(dataStr, 'data_url').then(function(snapshot) {
+                snapshot.ref.getDownloadURL().then(function(downloadURL) {
+                  var storyRef = db.collection('Stories').doc(storyID);
+                  storyRef.set({
+                    data: downloadURL
+                  }, {
+                    merge: true
+                  }).then(function() {
+                    Swal.fire({
+                      title: "The story is published!",
+                      icon: "success",
+                      allowOutsideClick: false,
+                      timer: 3000
+                    }).then(function() {
+                      window.location.href = "dashboard.html";
+                    });
+                  })
+                });
+              });
+            }).catch(function(error) {
+              console.error("Error adding document: ", error);
+              Swal.fire({
+                title: error,
+                icon: "error"
+              });
+            });
+          } else {
+            db.collection("Stories").add({
+              name: $("#story-title").text(),
+              category: $("#category").text(),
+              description: $("#subtitle").text(),
+              featuredimage: $("#featuredimage").attr("src"),
+              status: type,
+              upvotes: 0,
+              downvotes: 0,
+              played: 0,
+              level_easy: 1,
+              level_moderate: 0,
+              level_hard: 0,
+              timestamp_created: ist,
+              timestamp_modified: ist
+            }).then(function(docRef) {
+              var storageRef = firebase.storage().ref(docRef.id + '.json');
+              storageRef.putString(dataStr, 'data_url').then(function(snapshot) {
+                snapshot.ref.getDownloadURL().then(function(downloadURL) {
+                  var storyRef = db.collection('Stories').doc(docRef.id);
+                  storyRef.set({
+                    data: downloadURL
+                  }, {
+                    merge: true
+                  }).then(function() {
+                    storyID = docRef.id;
+                    Swal.fire({
+                      title: "The story is published!",
+                      icon: "success",
+                      allowOutsideClick: false,
+                      timer: 3000
+                    }).then(function() {
+                      window.location.href = "dashboard.html";
+                    });
+                  })
+                });
+              });
+            }).catch(function(error) {
+              console.error("Error adding document: ", error);
+              Swal.fire({
+                title: error,
+                icon: "error"
+              });
+            });
+          }
+        } catch (err) {
+          if (err.name == "TypeError") {
+            Swal.fire({
+              title: "Hey! Make sure that voice blocks does have an ending text block.",
+              icon: "warning"
+            });
+          } else {
+            Swal.fire({
+              title: err,
+              icon: "warning"
+            });
+          }
+        }
+      }
+
+      $('.publish_data').click(function() {
+        Swal.fire({
+          title: 'Please wait!',
+          text: "The story is getting saved.",
+          allowOutsideClick: false,
+          onBeforeOpen: () => {
+            Swal.showLoading()
+          },
+        });
+        save_story("Live");
+      });
+
+      $(document).on("click", "#imgLogo", function() {
+        selectedOperatorId = $flowchart.flowchart('getSelectedOperatorId');
+        $(this).siblings()[0].click();
+      });
+
+      $(document).on("click", "#featuredimage", function() {
+        $(this).siblings()[2].click();
+      });
+
+      var image = document.getElementById('image');
+      var $modal = $('#modal');
+      var cropper;
+      var reference;
+
+      $(document).on("change", ".inputFile", function() {
+        reference = $(this);
+        var done = function(url) {
+          image.src = url;
+          $modal.modal('show');
+        };
+        if (this.files && this.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            done(reader.result);
+          }
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+
+      $(document).on("change", "#inputFile", function() {
+        reference = $(this);
+        var done = function(url) {
+          image.src = url;
+          $modal.modal('show');
+        };
+        if (this.files && this.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            done(reader.result);
+          }
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+
+      $modal.on('shown.bs.modal', function() {
+        cropper = new Cropper(image, {
+          dragMode: 'move',
+          aspectRatio: 1 / 1,
+          viewMode: 3
+        });
+      }).on('hidden.bs.modal', function() {
+        $(reference)[0].value = '';
+        cropper.destroy();
+        cropper = null;
+      });
+
+      document.getElementById('crop').addEventListener('click', function() {
+        $modal.modal('hide');
+        var canvas = cropper.getCroppedCanvas({
+          width: 150,
+          height: 150,
+        });
+        var dataurl = canvas.toDataURL("image/png");
+        if ($(reference).attr("id") == "featured") {
+          $($(reference).siblings()[2]).attr('src', dataurl);
+        } else {
+          $($(reference).siblings()[0]).attr('src', dataurl);
+          $flowchart.flowchart('setOperatorBody', selectedOperatorId, $(reference).parents(".blockyinfo").parent().html());
+        }
+      });
+
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=medium-dpi">
+  <title>End</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/loader.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-firestore.js"></script>
+  <style>
+    td {
+      padding: 4px;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 35%;
+      left: 8%;
+    }
+
+    input[type=range] {
+      width: 100%;
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 20px;
+      background: linear-gradient(90deg, #49A05C 21.67%, #EA7E1F 37.09%, #EA7E1F 62.08%, #BF1829 80.89%);
+      border-radius: 20px;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      background: #FFFFFF;
+      border: 1px solid #B5B5B5;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
+      height: 30px;
+      width: 30px;
+      border-radius: 20px;
+      -webkit-appearance: none;
+      margin-top: -5px;
+    }
+
+    .progress.active .progress-bar {
+      -webkit-transition: none !important;
+      transition: none !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="loader" style="display:none;">
+    <div class='longfazers'>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <h1>Loading</h1>
+  </div>
+
+  <div id="start">
+    <div class="row" style="margin: 20px; margin-bottom: 0px;">
+      <table style="width: 100%;">
+        <tr>
+          <td style="text-align: right;"><svg id="done" style="float: right;" width="3vh" height="3vh" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.5001 16.3L2.2001 10L0.100098 12.1L8.5001 20.5L26.5001 2.49999L24.4001 0.399994L8.5001 16.3Z" fill="#49A05C" />
+            </svg>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="row" style="margin: 20px; margin-top: 0px; margin-bottom: 0px;">
+      <table style="width: 100%;">
+        <tr>
+          <td style="color: #454545; font-size: 3vh;">Liked the Story?</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="row" style="margin: 20px; margin-top: 0px; margin-bottom: 2vh;">
+      <table style="width: 100%;">
+        <tr style="text-align: center;">
+          <td style="width: 50%"><svg id="liked" width="5vh" height="5vh" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M19.7733 1.72761L11.0016 11.7524C10.4158 12.4219 10.0833 13.3448 10.0833 14.3038V32.3809C10.0833 34.3714 11.5083 36 13.2499 36H27.4999C28.7666 36 29.9066 35.1314 30.4132 33.8105L35.5749 20.04C36.9049 16.4571 34.6091 12.4762 31.2049 12.4762H22.2591L23.7633 4.18856C23.9216 3.2838 23.6841 2.36095 23.1141 1.70952C22.1799 0.659993 20.6916 0.659993 19.7733 1.72761ZM3.74992 36C5.49159 36 6.91658 34.3714 6.91658 32.3809V17.9048C6.91658 15.9143 5.49159 14.2857 3.74992 14.2857C2.00825 14.2857 0.583252 15.9143 0.583252 17.9048V32.3809C0.583252 34.3714 2.00825 36 3.74992 36Z"
+                fill="#D5D5D5" />
+            </svg>
+          </td>
+          <td style="width: 50%"><svg id="disliked" width="5vh" height="5vh" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M16.2267 34.7009L24.9825 24.6762C25.5683 24.0067 25.9008 23.0838 25.9008 22.1247V4.04761C25.9008 2.05713 24.4758 0.428558 22.7342 0.428558H8.5C7.23334 0.428558 6.09334 1.29713 5.6025 2.61808L0.440837 16.3886C-0.904996 19.9714 1.39084 23.9524 4.795 23.9524H13.7408L12.2367 32.24C12.0783 33.1447 12.3158 34.0676 12.8858 34.719C13.82 35.7686 15.3083 35.7686 16.2267 34.7009ZM32.25 0.428558C30.5083 0.428558 29.0833 2.05713 29.0833 4.04761V18.5238C29.0833 20.5143 30.5083 22.1428 32.25 22.1428C33.9917 22.1428 35.4167 20.5143 35.4167 18.5238V4.04761C35.4167 2.05713 33.9917 0.428558 32.25 0.428558Z"
+                fill="#D5D5D5" />
+            </svg>
+          </td>
+        </tr>
+        <tr style="text-align: center;">
+          <td style="color: #454545; font-size: 2vh; opacity: 0.7;">LIKED IT!</td>
+          <td style="color: #454545; font-size: 2vh; opacity: 0.7;">NAH!</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="row" style="margin: 20px; margin-top: 0px; margin-bottom: 0px;">
+      <table style="width: 100%;">
+        <tr>
+          <td style="color: #454545; font-size: 3vh;">Difficulty Level?</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="row" style="margin: 20px; margin-top: 0px; margin-bottom: 2vh;">
+      <table style="width: 100%;">
+        <tr>
+          <td colspan="3"><input id="slide" type="range" min="0" max="100" value="50" /></td>
+        </tr>
+        <tr>
+          <td style="color: #454545; font-size: 2vh; opacity: 0.7; text-align: left;">EASY</td>
+          <td style="color: #454545; font-size: 2vh; opacity: 0.7; text-align: center;">MODERATE</td>
+          <td style="color: #454545; font-size: 2vh; opacity: 0.7; text-align: right;">HARD</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+
+</body>
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', onDeviceReady, false);
+
+  function onDeviceReady() {
+
+    var firebaseConfig = {
+      apiKey: "AIzaSyCgfwf_60vbSmfYO5hJzOTbv0wo50HJL_4",
+      authDomain: "lingobuddy-be6cf.firebaseapp.com",
+      databaseURL: "https://lingobuddy-be6cf.firebaseio.com",
+      projectId: "lingobuddy-be6cf",
+      storageBucket: "lingobuddy-be6cf.appspot.com",
+      messagingSenderId: "1012948925882",
+      appId: "1:1012948925882:web:1ff53524be563839717183"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    var db = firebase.firestore();
+
+    var rating = "NA";
+
+    var difficulty = 50;
+
+    $("#done").click(function() {
+      $(".loader").show();
+      $("#start").hide();
+      db.collection('Stories').doc(localStorage.storyID).update({
+        upvotes: (rating == "liked") ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+        downvotes: (rating == "disliked") ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+        played: firebase.firestore.FieldValue.increment(1),
+        level_easy: (difficulty <= 34) ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+        level_moderate: (difficulty > 34 && difficulty < 66) ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+        level_hard: (difficulty >= 66) ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0)
+      }).then(function() {
+        window.location.href = "index.html";
+      });
+    });
+
+    $(document).on('input', '#slide', function() {
+      difficulty = $(this).val();
+    });
+
+    $("#liked").click(function() {
+      rating = "liked";
+      $("#liked").children("path").css("fill", "#49A05C");
+      $("#disliked").children("path").css("fill", "#D5D5D5");
+    });
+
+    $("#disliked").click(function() {
+      rating = "disliked";
+      $("#liked").children("path").css("fill", "#D5D5D5");
+      $("#disliked").children("path").css("fill", "#BF1829");
+    });
+
+  }
+</script>
+
+</html>

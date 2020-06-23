@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" style="background: #f8f9fc;">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+  <title>Dashboard</title>
+
+  <link href="fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="css/sb-admin-2.css" rel="stylesheet">
+  <link href="datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/sb-admin-2.min.js"></script>
+  <script src="datatables/jquery.dataTables.min.js"></script>
+  <script src="datatables/dataTables.bootstrap4.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-firestore.js"></script>
+
+</head>
+
+<body id="page-top">
+
+  <div id="wrapper">
+    <div id="content-wrapper" class="d-flex flex-column">
+      <div class="loader" style="display: flex;justify-content: center;align-items: center;height: 100vh;">
+        <div class="spinner-grow text-primary"></div>
+      </div>
+      <div id="content" style="display:none;">
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+          <div class="font-weight-bold text-gray-900">
+            <span class="text">LINGOBUDDY DESIGNER</span>
+          </div>
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item" style="padding: 10px">
+              <a href="designer.html" class="btn btn-primary btn-icon-split">
+                <span class="icon text-white-50">
+                  <i class="fas fa-plus"></i>
+                </span> <span class="text">Create Story</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="container-fluid"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <script>
+    $(document).ready(function() {
+
+      var firebaseConfig = {
+        apiKey: "AIzaSyCgfwf_60vbSmfYO5hJzOTbv0wo50HJL_4",
+        authDomain: "lingobuddy-be6cf.firebaseapp.com",
+        databaseURL: "https://lingobuddy-be6cf.firebaseio.com",
+        projectId: "lingobuddy-be6cf",
+        storageBucket: "lingobuddy-be6cf.appspot.com",
+        messagingSenderId: "1012948925882",
+        appId: "1:1012948925882:web:1ff53524be563839717183"
+      };
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.firestore();
+
+      var stories;
+
+      db.collection("Stories").where("status", "==", "Live")
+        .get()
+        .then(function(querySnapshot) {
+          $(".container-fluid").append(
+            '<div class="card shadow mb-4"> <div class="card-header py-3"> <h6 class="m-0 font-weight-bold text-primary">Published Stories</h6> </div> <div class="card-body"> <div class="table-responsive"> <table class="table table-bordered" id="publishedstories" width="100%" cellspacing="0"> <thead> <tr> <th>Name</th> <th>Category</th> <th>Upvotes</th> <th>Downvotes</th> <th># Played</th> <th>Difficulty</th> <th>Created</th> <th>Modified</th> <th>Actions</th> </tr> </thead> </table> </div> </div> </div>'
+          );
+          stories = $('#publishedstories').DataTable({
+            'processing': true,
+            'columnDefs': [{
+              'targets': [8],
+              'orderable': false
+            }]
+          });
+          querySnapshot.forEach(function(doc) {
+            var actions = '<a href="designer.html?load=' + doc.id +
+              '" class="btn btn-warning btn-icon-split"> <span class="icon text-white-50"> <i class="fas fa-edit"></i> </span> <span class="text">Edit</span> </a>';
+            stories.row.add([doc.data()["name"], doc.data()["category"], doc.data()["upvotes"], doc.data()["downvotes"], doc.data()["played"], doc.data()["level_easy"] + " || " + doc.data()["level_moderate"] + " || " + doc
+              .data()["level_hard"], doc.data()["timestamp_created"], doc.data()["timestamp_modified"], actions
+            ]).draw();
+          });
+        });
+
+      $(".loader").hide();
+      $("#content").show();
+
+
+    });
+  </script>
+
+</body>
+
+</html>

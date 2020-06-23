@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=medium-dpi">
+  <title>Stories</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/loader.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-firestore.js"></script>
+  <style>
+    .card-title {
+      text-align: center;
+      font-size: 3.5vw;
+      color: #454545;
+      text-transform: uppercase;
+      margin-top: 10%;
+      margin-bottom: 0px;
+    }
+
+    .card {
+      width: 25vw;
+      border: none;
+    }
+
+    .row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    td {
+      padding: 0 10px 0 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="loader">
+    <div class='longfazers'>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <h1>Loading</h1>
+  </div>
+
+  <div class="start" style="display:none;">
+    <div class="container" style="overflow: auto; padding: 10px; height: 100vh;">
+
+      <div class="row" style="margin: 8px; margin-top: 10px; display: flow-root;">
+        <p class="d-flex" style="float: left; font-size: 6vw; margin-bottom: 0px; opacity: 0.75;">STORIES</p>
+      </div>
+
+      <div id="stories"></div>
+
+      <div style="margin-bottom: 100px;"></div>
+
+      <template id="template">
+        <div class="row" style="margin-top: 10px;" id="story">
+          <div class="card flex-row flex-wrap" style="color: #454545;width: 90vw;background: #FBF9FF;border: 1px solid #E5E5E5;box-sizing: border-box;box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);border-radius: 10px;">
+            <table style="margin: 5px; margin-left: 10px; margin-right: 10px; width: 100%;">
+              <tr>
+                <td rowspan="4"><img id="featuredimage" style="float: left; width: 18vw; height: auto; border-radius: 5px;">
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 14px; text-transform: uppercase; font-weight: 500; color: #858585;" id="category"></td>
+                <td style="padding-right: 0px;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path id="difficulty" d="M14 7C14 10.866 10.866 14 7 14C3.13401 14 0 10.866 0 7C0 3.13401 3.13401 0 7 0C10.866 0 14 3.13401 14 7Z" fill="#000000" />
+                  </svg>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 16px; font-weight: bold;" id="title"></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td style="font-size: 14px;" id="description"></td>
+                <td style="vertical-align: bottom; padding-right: 0px;"><svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path id="playedTick" d="M5.9999 11.2L1.7999 7.00001L0.399902 8.40001L5.9999 14L17.9999 2.00001L16.5999 0.600006L5.9999 11.2Z" fill="none" />
+                  </svg>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </template>
+
+    </div>
+
+  </div>
+
+</body>
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', onDeviceReady, false);
+
+  function onDeviceReady() {
+
+    var firebaseConfig = {
+      apiKey: "AIzaSyCgfwf_60vbSmfYO5hJzOTbv0wo50HJL_4",
+      authDomain: "lingobuddy-be6cf.firebaseapp.com",
+      databaseURL: "https://lingobuddy-be6cf.firebaseio.com",
+      projectId: "lingobuddy-be6cf",
+      storageBucket: "lingobuddy-be6cf.appspot.com",
+      messagingSenderId: "1012948925882",
+      appId: "1:1012948925882:web:1ff53524be563839717183"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    var db = firebase.firestore();
+
+    var query = db.collection("Stories").where("status", "==", "Live");
+
+    var language = {
+      "English": "EZY7IILONGMINRMNR4VHOSCBAQ3CUL3R",
+      "German": "O2EF36F5MWF3IUYGZODB5JU3DCGR6SJN",
+      "French": "LJ2XHDN3BNI7JUUGDMLRGAUY7WOULSRV"
+    };
+
+    if (localStorage.getItem("storiesPlayed")) {
+      var storiesPlayed = localStorage.getItem("storiesPlayed").split(",");
+    } else {
+      var storiesPlayed = "";
+    }
+
+    query.get().then(function(querySnapshot) {
+      querySnapshot.forEach(function(doc) {
+        var t = document.querySelector('#template');
+        t.content.querySelector('#story').setAttribute("storyID", doc.id);
+        t.content.querySelector('#story').setAttribute("dataURL", doc.data()["data"]);
+        t.content.querySelector('#story').setAttribute("category", doc.data()["category"]);
+        t.content.querySelector('#story').setAttribute("title", doc.data()["name"]);
+        var o = {
+          "Easy": doc.data()["level_easy"],
+          "Moderate": doc.data()["level_moderate"],
+          "Hard": doc.data()["level_hard"]
+        };
+        var difficulty = Object.keys(o).reduce(function(a, b) {
+          return o[a] > o[b] ? a : b
+        });
+        t.content.querySelector('#story').setAttribute("difficulty", String(difficulty));
+        t.content.querySelector('#category').textContent = doc.data()["category"];
+        t.content.querySelector('#title').textContent = doc.data()["name"];
+        t.content.querySelector('#description').textContent = doc.data()["description"];
+        t.content.querySelector('#featuredimage').src = doc.data()["featuredimage"];
+        t.content.querySelector('#difficulty').setAttribute("class", String(difficulty));
+
+        if (storiesPlayed.includes(doc.id)) {
+          t.content.querySelector('#playedTick').setAttribute("class", "played");
+        } else {
+          t.content.querySelector('#playedTick').setAttribute("class", "notplayed");
+        }
+
+        var clone = document.importNode(t.content, true);
+        $("#stories").append(clone);
+      });
+
+      $(".loader").hide();
+      $(".start").show();
+    });
+
+    $(document).on("click", "#story", function() {
+      $(".start").hide();
+      $(".loader").show();
+      localStorage.setItem("storyID", $(this).attr("storyID"));
+      localStorage.setItem("category", $(this).attr("category"));
+      localStorage.setItem("title", $(this).attr("title"));
+      localStorage.setItem("difficulty", $(this).attr("difficulty"));
+      localStorage.setItem("next", 0);
+      localStorage.setItem("maxpoints", 0);
+      localStorage.setItem("score", 0);
+      localStorage.setItem("token", language[$(this).attr("category")]);
+      $.ajax({
+        url: $(this).attr("dataURL"),
+        success: function(data) {
+          sessionStorage.setItem("gameplay", JSON.stringify(data["story"]));
+          window.location.href = "play.html";
+        }
+      });
+    });
+  }
+</script>
+
+</html>
